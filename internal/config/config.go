@@ -30,7 +30,7 @@ type httpConfig struct {
 	port string
 }
 
-func NeHTTPConfig() (HTTPConfig, error) {
+func NewHTTPConfig() (HTTPConfig, error) {
 	host := os.Getenv(httpHostEnvName)
 	if len(host) == 0 {
 		return nil, errors.New("http host not found")
