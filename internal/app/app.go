@@ -65,7 +65,7 @@ func (a *App) initHTTPServer() error {
 	setRoutes(router, a.provider.Handlers())
 
 	a.httpServer = &http.Server{
-		Addr:           ":8090",
+		Addr:           a.provider.HTTPConfig().Address(),
 		Handler:        router,
 		ReadTimeout:    10 * time.Second, // 10 sec limit for reading request
 		WriteTimeout:   10 * time.Second, // 10 sec limit for writing response
