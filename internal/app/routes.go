@@ -6,9 +6,7 @@ import (
 )
 
 func setRoutes(router chi.Router, handlers *handler.Provider) {
-	// router.Route("/products", func(r chi.Router) {
-		
-	// })
-
-	router.Post("/products", handlers.Create)
+	router.Route("/products", func(r chi.Router) {
+		r.Post("/", handlers.Create)
+	})
 }

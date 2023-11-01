@@ -21,7 +21,7 @@ func newProvider() *provider {
 
 func (p *provider) HTTPConfig() config.HTTPConfig {
 	if p.httpConfig == nil {
-		cfg, err := config.NeHTTPConfig()
+		cfg, err := config.NewHTTPConfig()
 		if err != nil {
 			log.Fatalf("failed to get http config: %s", err.Error())
 		}
