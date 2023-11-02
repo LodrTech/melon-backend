@@ -10,9 +10,9 @@ type productServiceImpl struct {
 	productRepo repository.ProductRepo
 }
 
-func NewProductService() ProductService {
+func NewProductService(productRepo repository.ProductRepo) ProductService {
 	return &productServiceImpl{
-
+		productRepo: productRepo,
 	}
 }
 
