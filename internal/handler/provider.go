@@ -1,6 +1,9 @@
 package handler
 
-import "github.com/Marif226/melon/internal/service"
+import (
+	"github.com/Marif226/melon/internal/handler/product"
+	"github.com/Marif226/melon/internal/service"
+)
 
 type Provider struct {
 	ProductHandler
@@ -8,6 +11,6 @@ type Provider struct {
 
 func NewProvider(services *service.Provider) *Provider {
 	return &Provider{
-		ProductHandler: NewProductHandler(services.ProductService),
+		ProductHandler: product.NewProductHandler(services.ProductService),
 	}
 }

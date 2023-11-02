@@ -1,4 +1,4 @@
-package service
+package product
 
 import (
 	"log"
@@ -6,17 +6,17 @@ import (
 	"github.com/Marif226/melon/internal/repository"
 )
 
-type productServiceImpl struct {
+type productService struct {
 	productRepo repository.ProductRepo
 }
 
-func NewProductService(productRepo repository.ProductRepo) ProductService {
-	return &productServiceImpl{
+func NewProductService(productRepo repository.ProductRepo) *productService {
+	return &productService {
 		productRepo: productRepo,
 	}
 }
 
-func (s *productServiceImpl) Create(request model.Product) (*model.Product, error) {
+func (s *productService) Create(request model.Product) (*model.Product, error) {
 	log.Println("Product.service.Create: ", request)
 	return &request, nil
 }

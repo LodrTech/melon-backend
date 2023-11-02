@@ -1,24 +1,23 @@
-package handler
+package product
 
 import (
 	"net/http"
-
 	"github.com/Marif226/melon/internal/model"
 	"github.com/Marif226/melon/internal/service"
 	"github.com/google/jsonapi"
 )
 
-type productHandlerImpl struct {
+type productHandler struct {
 	service.ProductService
 }
 
-func NewProductHandler(productService service.ProductService) ProductHandler {
-	return &productHandlerImpl{
+func NewProductHandler(productService service.ProductService) *productHandler {
+	return &productHandler{
 		ProductService: productService,
 	}
 }
 
-func (h *productHandlerImpl) Create(w http.ResponseWriter, r *http.Request) {
+func (h *productHandler) Create(w http.ResponseWriter, r *http.Request) {
 	request := &model.Product{}
 
 	err := jsonapi.UnmarshalPayload(r.Body, request)
