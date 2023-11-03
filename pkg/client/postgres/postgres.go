@@ -14,8 +14,6 @@ func NewPostgresDB(ctx context.Context, cfg config.PGConfig) (*pgx.Conn, error) 
 		return nil, err
 	}
 
-	defer conn.Close(ctx)
-
 	err = conn.Ping(ctx)
 	if err != nil {
 		return nil, err
