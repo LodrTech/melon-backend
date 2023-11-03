@@ -1,18 +1,20 @@
 package app
 
 import (
+	"context"
 	"log"
+
 	"github.com/Marif226/melon/internal/config"
 	"github.com/Marif226/melon/internal/handler"
 	"github.com/Marif226/melon/internal/repository"
 	"github.com/Marif226/melon/internal/service"
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v5"
 )
 
 type provider struct {
 	httpConfig 	config.HTTPConfig
 	pgConfig	config.PGConfig
-	postgres	*sqlx.DB
+	postgres	*pgx.Conn
 	repos		*repository.Repository
 	services	*service.Provider
 	handlers	*handler.Provider
@@ -48,9 +50,9 @@ func (p *provider) PGConfig() config.PGConfig {
 	return p.pgConfig
 }
 
-func (p *provider) Postgres() *sqlx.DB {
+func (p *provider) Postgres(ctx context.Context) *pgx.Conn {
 	if p.postgres == nil {
-		postgres, err := repository.NewPostgresDB(p.PGConfig())
+		postgres, err := repository.NewPostgresDB(ctx, p.PGConfig())
 		if err != nil {
 			log.Fatalf("failed to get postgres: %s", err.Error())
 		}
@@ -61,25 +63,25 @@ func (p *provider) Postgres() *sqlx.DB {
 	return p.postgres
 }
 
-func (p *provider) Repos() *repository.Repository {
+func (p *provider) Repos(ctx context.Context) *repository.Repository {
 	if p.repos == nil {
-		p.repos = repository.New(p.Postgres())
+		p.repos = repository.New(p.Postgres(ctx))
 	}
 
 	return p.repos
 }
 
-func (p *provider) Services() *service.Provider {
+func (p *provider) Services(ctx context.Context) *service.Provider {
 	if p.services == nil {
-		p.services = service.NewProvider(p.Repos())
+		p.services = service.NewProvider(p.Repos(ctx))
 	}
 
 	return p.services
 }
 
-func (p *provider) Handlers() *handler.Provider{
+func (p *provider) Handlers(ctx context.Context) *handler.Provider{
 	if p.handlers == nil {
-		p.handlers = handler.NewProvider(p.Services())
+		p.handlers = handler.NewProvider(p.Services(ctx))
 	}
 
 	return p.handlers

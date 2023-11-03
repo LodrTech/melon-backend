@@ -1,24 +1,26 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/Marif226/melon/internal/config"
-	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
+	"github.com/jackc/pgx/v5"
 )
 
-func NewPostgresDB(cfg config.PGConfig) (*sqlx.DB, error) {
+func NewPostgresDB(ctx context.Context, cfg config.PGConfig) (*pgx.Conn, error) {
 	connectionStr := cfg.ConnectionString()
-	
-	db, err := sqlx.Open("postgres", connectionStr)
 
+	conn, err := pgx.Connect(ctx, connectionStr)
 	if err != nil {
 		return nil, err
 	}
 
-	err = db.Ping()
+	defer conn.Close(ctx)
+
+	err = conn.Ping(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return db, nil
+	return conn, nil
 }

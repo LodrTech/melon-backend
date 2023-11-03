@@ -2,15 +2,15 @@ package repository
 
 import (
 	"github.com/Marif226/melon/internal/repository/product"
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v5"
 )
 
 type Repository struct {
 	ProductRepo
 }
 
-func New(db *sqlx.DB) *Repository {
+func New(conn *pgx.Conn) *Repository {
 	return &Repository{
-		ProductRepo: product.NewProductRepo(db),
+		ProductRepo: product.NewProductRepo(conn),
 	}
 }

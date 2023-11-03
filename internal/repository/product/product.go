@@ -2,19 +2,21 @@ package product
 
 import (
 	"github.com/Marif226/melon/internal/model"
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v5"
 )
 
 type productRepo struct {
-	db *sqlx.DB
+	db *pgx.Conn
 }
 
-func NewProductRepo(db *sqlx.DB) *productRepo {
+func NewProductRepo(conn *pgx.Conn) *productRepo {
 	return &productRepo {
-		db: db,
+		db: conn,
 	}
 }
 
 func (r *productRepo) Create(request model.Product) (*model.Product, error) {
+
+
 	return nil, nil
 }

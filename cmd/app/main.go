@@ -1,12 +1,15 @@
 package main
 
 import (
+	"context"
 	"log"
 	"github.com/Marif226/melon/internal/app"
 )
 
 func main() {
-	a, err := app.NewApp()
+	ctx := context.Background()
+
+	a, err := app.NewApp(ctx)
 	if err != nil {
 		log.Fatalf("failed to init app: %s", err.Error())
 	}
