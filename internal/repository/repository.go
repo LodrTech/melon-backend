@@ -1,9 +1,11 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/Marif226/melon/internal/model"
 )
 
 type ProductRepo interface {
-	Create(request model.Product) (*model.Product, error)
+	Create(ctx context.Context, request model.Product) (model.Product, error)
 }

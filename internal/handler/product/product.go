@@ -26,7 +26,7 @@ func (h *productHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := h.ProductService.Create(*request)
+	response, err := h.ProductService.Create(r.Context(), *request)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
