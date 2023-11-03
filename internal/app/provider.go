@@ -3,11 +3,11 @@ package app
 import (
 	"context"
 	"log"
-
 	"github.com/Marif226/melon/internal/config"
 	"github.com/Marif226/melon/internal/handler"
 	"github.com/Marif226/melon/internal/repository"
 	"github.com/Marif226/melon/internal/service"
+	"github.com/Marif226/melon/pkg/client/postgres"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -52,7 +52,7 @@ func (p *provider) PGConfig() config.PGConfig {
 
 func (p *provider) Postgres(ctx context.Context) *pgx.Conn {
 	if p.postgres == nil {
-		postgres, err := repository.NewPostgresDB(ctx, p.PGConfig())
+		postgres, err := postgres.NewPostgresDB(ctx, p.PGConfig())
 		if err != nil {
 			log.Fatalf("failed to get postgres: %s", err.Error())
 		}

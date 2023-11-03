@@ -1,8 +1,7 @@
-package repository
+package postgres
 
 import (
 	"context"
-
 	"github.com/Marif226/melon/internal/config"
 	"github.com/jackc/pgx/v5"
 )
