@@ -2,28 +2,15 @@ package product
 
 import (
 	"net/http"
-	"strconv"
-	validate "github.com/Marif226/melon/internal/lib/validator/product"
 	"github.com/Marif226/melon/pkg/helper"
-	"github.com/go-chi/chi/v5"
 	"github.com/google/jsonapi"
 )
 
 func (h *productHandler) Get(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	id, err := helper.GetPathParamID(r)
 	if err != nil {
 		helper.JsonapiError(w, []*jsonapi.ErrorObject{{
 			Title: "ID Error`",
-			Detail: err.Error(),
-			Status: "400",
-		}})
-		return
-	}
-
-	err = validate.ValidateID(id) 
-	if err != nil {
-		helper.JsonapiError(w, []*jsonapi.ErrorObject{{
-			Title: "ID error`",
 			Detail: err.Error(),
 			Status: "400",
 		}})
