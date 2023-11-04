@@ -24,3 +24,17 @@ func ProductCreate(request model.Product) (string, []any, error)  {
 
 	return qbuilder.ToSql()
 }
+
+func ProductList(request model.ProductListRequest) (string, []any, error)  {
+	qbuilder := squirrel.Select(
+		"p.id",
+		"p.name",
+		"p.description",
+		"p.price",
+		"p.weight",
+	).From(
+		"products AS p",
+	).PlaceholderFormat(squirrel.Dollar)
+
+	return qbuilder.ToSql()
+}

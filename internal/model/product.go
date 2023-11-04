@@ -7,3 +7,7 @@ type Product struct {
 	Price 		float32 `jsonapi:"attr,price" validate:"required,gt=0"`
 	Weight		int 	`jsonapi:"attr,weight" validate:"required"`
 }
+
+type ProductListRequest struct {
+
+}
