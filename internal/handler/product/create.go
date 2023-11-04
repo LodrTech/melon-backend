@@ -34,7 +34,7 @@ func (h *productHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", jsonapi.MediaType)
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 
 	err = jsonapi.MarshalPayload(w, response)
 	if err != nil {
