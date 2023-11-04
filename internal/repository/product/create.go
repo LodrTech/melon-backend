@@ -14,7 +14,7 @@ import (
 func (r *productRepo) Create(ctx context.Context, request model.Product) (model.Product, error) {
 	query, args, err := querybuilder.ProductCreate(request)
 	if err != nil {
-		return model.Product{}, nil
+		return model.Product{}, err
 	}
 
 	err = r.db.QueryRow(ctx, query, args...).Scan(&request.ID)
