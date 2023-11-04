@@ -2,8 +2,10 @@ package product
 
 import (
 	"net/http"
+	validate "github.com/Marif226/melon/internal/lib/validator/product"
 	"github.com/Marif226/melon/internal/model"
 	"github.com/Marif226/melon/internal/service"
+	"github.com/Marif226/melon/pkg/helper"
 	"github.com/google/jsonapi"
 )
 
@@ -23,6 +25,16 @@ func (h *productHandler) Create(w http.ResponseWriter, r *http.Request) {
 	err := jsonapi.UnmarshalPayload(r.Body, request)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	err = validate.Create(request)
+	if err != nil {
+		helper.JsonapiError(w, []*jsonapi.ErrorObject{{
+			Title: "Validation Error",
+			Detail: err.Error(),
+			Status: "400",
+		}})
 		return
 	}
 
