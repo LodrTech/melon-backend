@@ -54,3 +54,35 @@ func ProductGet(id int) (string, []any, error)  {
 
 	return qbuilder.ToSql()
 }
+
+func ProductUpdate(request model.ProductUpdateRequest) (string, []any, error)  {
+	setMap := make(map[string]any)
+
+	if request.Name != "" {
+		setMap["name"] = request.Name
+	}
+
+	if request.Description != "" {
+		setMap["description"] = request.Description
+	}
+
+	if request.Price != 0.0 {
+		setMap["price"] = request.Price
+	}
+
+	if request.Weight != 0 {
+		setMap["weight"] = request.Weight
+	}
+
+	qbuilder := squirrel.Update(
+		"products AS p",
+	).SetMap(
+		setMap,
+	).Where(
+		squirrel.Eq{"p.id": request.ID},
+	).Suffix(
+		"RETURNING p.id, p.name, p.description, p.price, p.weight",
+	).PlaceholderFormat(squirrel.Dollar)
+
+	return qbuilder.ToSql()
+}

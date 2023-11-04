@@ -10,5 +10,6 @@ func setRoutes(router chi.Router, handlers *handler.Provider) {
 		r.Post("/", handlers.ProductHandler.Create)
 		r.Get("/", handlers.ProductHandler.List)
 		r.Get("/{id}", handlers.ProductHandler.Get)
+		r.Patch("/", handlers.ProductHandler.Update)
 	})
 }
