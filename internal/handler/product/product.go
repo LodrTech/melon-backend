@@ -20,7 +20,7 @@ func NewProductHandler(productService service.ProductService) *productHandler {
 }
 
 func (h *productHandler) Create(w http.ResponseWriter, r *http.Request) {
-	request := &model.Product{}
+	var request model.Product
 
 	err := jsonapi.UnmarshalPayload(r.Body, request)
 	if err != nil {
@@ -28,7 +28,7 @@ func (h *productHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = validate.Create(request)
+	err = validate.Create(&request)
 	if err != nil {
 		helper.JsonapiError(w, []*jsonapi.ErrorObject{{
 			Title: "Validation Error",
@@ -38,7 +38,7 @@ func (h *productHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response, err := h.ProductService.Create(r.Context(), *request)
+	response, err := h.ProductService.Create(r.Context(), request)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
