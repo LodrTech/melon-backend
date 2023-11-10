@@ -2,12 +2,19 @@ package postgres
 
 import (
 	"context"
-	"github.com/Marif226/melon/internal/config"
+	"log"
+
 	"github.com/jackc/pgx/v5"
 )
 
-func NewPostgresDB(ctx context.Context, cfg config.PGConfig) (*pgx.Conn, error) {
+type pgConfig interface {
+	ConnectionString() string
+}
+
+func NewPostgresDB(ctx context.Context, cfg pgConfig) (*pgx.Conn, error) {
 	connectionStr := cfg.ConnectionString()
+
+	log.Println(connectionStr)
 
 	conn, err := pgx.Connect(ctx, connectionStr)
 	if err != nil {
