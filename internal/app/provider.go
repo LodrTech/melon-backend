@@ -2,16 +2,21 @@ package app
 
 import (
 	"context"
+	"errors"
 	"log"
 	"github.com/Marif226/melon/internal/config"
 	"github.com/Marif226/melon/internal/handler"
 	"github.com/Marif226/melon/internal/repository"
 	"github.com/Marif226/melon/internal/service"
 	"github.com/Marif226/melon/pkg/client/postgres"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/jackc/pgx/v5"
 )
 
 type provider struct {
+	config		config.Config
 	httpConfig 	config.HTTPConfig
 	pgConfig	config.PGConfig
 	postgres	*pgx.Conn
@@ -22,6 +27,19 @@ type provider struct {
 
 func newProvider() *provider {
 	return &provider{}
+}
+
+func (p *provider) Config() config.Config {
+	if p.config == nil {
+		config, err := config.NewConfig()
+		if err != nil {
+			log.Fatalf("failed to get config: %s", err.Error())
+		}
+
+		p.config = config
+	}
+
+	return p.config
 }
 
 func (p *provider) HTTPConfig() config.HTTPConfig {
@@ -60,7 +78,32 @@ func (p *provider) Postgres(ctx context.Context) *pgx.Conn {
 		p.postgres = postgres
 	}
 
+	err := runDBMigrations(p.Config().MigrationURL(), p.PGConfig().ConnectionString())
+	if err != nil {
+		log.Fatalf("failed to migrate: %s", err.Error())
+	}
+
 	return p.postgres
+}
+
+func runDBMigrations(migrationURL string, postgresURL string) error {
+	m, err := migrate.New(migrationURL, postgresURL)
+	if err != nil {
+		return err
+	}
+
+	err = m.Up()
+	if err != nil {
+		if errors.Is(err, migrate.ErrNoChange) {
+			log.Println("migrate up:", err)
+			return nil
+		}
+		return err
+	}
+
+	log.Println("db migrated successfully")
+
+	return nil
 }
 
 func (p *provider) Repos(ctx context.Context) *repository.Repository {
