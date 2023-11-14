@@ -1,0 +1,26 @@
+services:
+  app:
+    build: ./
+    image: melon:local
+    container_name: melon-backend
+    depends_on:
+      postgresql:
+         condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - '8090:${HTTP_PORT}'
+  postgresql:
+    image: postgres:14-alpine
+    container_name: melondb
+    env_file:
+      - .env
+    # volumes:
+    #   - ./data:/var/lib/postgresql/data
+    ports:
+      - '5436:${POSTGRES_PORT}'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
