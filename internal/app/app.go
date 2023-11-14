@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-
 	"github.com/Marif226/melon/internal/config"
 	"github.com/go-chi/chi/v5"
 )
@@ -48,7 +47,7 @@ func (a *App) initDeps(ctx context.Context) error {
 }
 
 func (a *App) initConfig(_ context.Context) error {
-	err := config.Load(".env")
+	err := config.Load("./.env")
 	if err != nil {
 		return err
 	}
