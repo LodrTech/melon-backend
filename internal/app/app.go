@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 	"github.com/Marif226/melon/internal/config"
+	mw "github.com/Marif226/melon/internal/middleware"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -62,6 +63,8 @@ func (a *App) initServiceProvider(_ context.Context) error {
 
 func (a *App) initHTTPServer(ctx context.Context) error {
 	router := chi.NewRouter()
+
+	router.Use(mw.JsonapiMediaTypeMiddleware)
 
 	setRoutes(router, a.provider.Handlers(ctx))
 
