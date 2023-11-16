@@ -1,10 +1,10 @@
 package product
 
 import (
+	"fmt"
 	"net/http"
 	validate "github.com/Marif226/melon/internal/lib/validator/product"
 	"github.com/Marif226/melon/internal/model"
-	"github.com/Marif226/melon/pkg/helper"
 	"github.com/google/jsonapi"
 )
 
@@ -13,32 +13,47 @@ func (h *productHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	err := jsonapi.UnmarshalPayload(r.Body, &request)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		jsonapi.MarshalErrors(w, []*jsonapi.ErrorObject{{
+			Title: "Invalid Request Body",
+			Detail: err.Error(),
+			Status: fmt.Sprint(http.StatusBadRequest),
+		}})
 		return
 	}
 
 	err = validate.Update(request)
 	if err != nil {
-		helper.JsonapiError(w, []*jsonapi.ErrorObject{{
-			Title:  "Validation Error",
+		w.WriteHeader(http.StatusBadRequest)
+		jsonapi.MarshalErrors(w, []*jsonapi.ErrorObject{{
+			Title: "Validation Error",
 			Detail: err.Error(),
-			Status: "400",
+			Status: fmt.Sprint(http.StatusBadRequest),
 		}})
 		return
 	}
 
 	response, err := h.ProductService.Update(r.Context(), request)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonapi.MarshalErrors(w, []*jsonapi.ErrorObject{{
+			Title: "Server Error",
+			Detail: err.Error(),
+			Status: fmt.Sprint(http.StatusInternalServerError),
+		}})
 		return
 	}
 
-	w.Header().Set("Content-Type", jsonapi.MediaType)
 	w.WriteHeader(http.StatusOK)
 
 	err = jsonapi.MarshalPayload(w, response)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		jsonapi.MarshalErrors(w, []*jsonapi.ErrorObject{{
+			Title: "Server Error",
+			Detail: err.Error(),
+			Status: fmt.Sprint(http.StatusInternalServerError),
+		}})
 		return
 	}
 }
