@@ -16,9 +16,8 @@ import (
 )
 
 type provider struct {
-	config		config.Config
-	httpConfig 	config.HTTPConfig
-	pgConfig	config.PGConfig
+	config		*config.Config
+	
 	postgres	*pgx.Conn
 	repos		*repository.Repository
 	services	*service.Provider
@@ -29,7 +28,7 @@ func newProvider() *provider {
 	return &provider{}
 }
 
-func (p *provider) Config() config.Config {
+func (p *provider) Config() *config.Config {
 	if p.config == nil {
 		config, err := config.NewConfig()
 		if err != nil {
@@ -42,35 +41,9 @@ func (p *provider) Config() config.Config {
 	return p.config
 }
 
-func (p *provider) HTTPConfig() config.HTTPConfig {
-	if p.httpConfig == nil {
-		cfg, err := config.NewHTTPConfig()
-		if err != nil {
-			log.Fatalf("failed to get http config: %s", err.Error())
-		}
-
-		p.httpConfig = cfg
-	}
-
-	return p.httpConfig
-}
-
-func (p *provider) PGConfig() config.PGConfig {
-	if p.pgConfig == nil {
-		cfg, err := config.NewPGConfig()
-		if err != nil {
-			log.Fatalf("failed to get postgres config: %s", err.Error())
-		}
-
-		p.pgConfig = cfg
-	}
-
-	return p.pgConfig
-}
-
 func (p *provider) Postgres(ctx context.Context) *pgx.Conn {
 	if p.postgres == nil {
-		postgres, err := postgres.NewPostgresDB(ctx, p.PGConfig())
+		postgres, err := postgres.NewPostgresDB(ctx, p.Config().PGConfig)
 		if err != nil {
 			log.Fatalf("failed to get postgres: %s", err.Error())
 		}
@@ -78,7 +51,7 @@ func (p *provider) Postgres(ctx context.Context) *pgx.Conn {
 		p.postgres = postgres
 	}
 
-	err := runDBMigrations(p.Config().MigrationURL(), p.PGConfig().ConnectionString())
+	err := runDBMigrations(p.Config().MigrationURL, p.Config().ConnectionString())
 	if err != nil {
 		log.Fatalf("failed to migrate: %s", err.Error())
 	}

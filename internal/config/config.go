@@ -3,16 +3,13 @@ package config
 import (
 	"errors"
 	"os"
-
 	"github.com/joho/godotenv"
 )
 
-type Config interface {
-	MigrationURL() string
-}
-
-type config struct {
-	migrationURL	string
+type Config struct {
+	MigrationURL	string
+	HTTPConfig
+	PGConfig
 }
 
 func Load(path string) error {
@@ -24,17 +21,25 @@ func Load(path string) error {
 	return nil
 }
 
-func NewConfig() (Config, error) {
+func NewConfig() (*Config, error) {
 	migrationURL := os.Getenv("MIGRATION_URL")
 	if len(migrationURL) == 0 {
 		return nil, errors.New("migration url not found")
 	}
 
-	return &config{
-		migrationURL: migrationURL,
-	}, nil
-}
+	httpConfig, err := NewHTTPConfig()
+	if err != nil {
+		return nil, err
+	}
 
-func (c *config) MigrationURL() string {
-	return c.migrationURL
+	pgConfig, err := NewPGConfig()
+	if err != nil {
+		return nil, err
+	}
+
+	return &Config{
+		MigrationURL: migrationURL,
+		HTTPConfig: httpConfig,
+		PGConfig: pgConfig,
+	}, nil
 }

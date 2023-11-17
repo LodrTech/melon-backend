@@ -69,7 +69,7 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 	setRoutes(router, a.provider.Handlers(ctx))
 
 	a.httpServer = &http.Server{
-		Addr:           a.provider.HTTPConfig().Address(),
+		Addr:           a.provider.Config().Address(),
 		Handler:        router,
 		ReadTimeout:    10 * time.Second, // 10 sec limit for reading request
 		WriteTimeout:   10 * time.Second, // 10 sec limit for writing response
@@ -82,7 +82,7 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 }
 
 func (a *App) runHTTPerver() error {
-	log.Printf("HTTP server is running on %s", a.provider.HTTPConfig().Address())
+	log.Printf("HTTP server is running on %s", a.provider.Config().Address())
 
 	err := a.httpServer.ListenAndServe()
 	if err != nil {
