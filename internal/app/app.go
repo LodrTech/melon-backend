@@ -67,7 +67,7 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initHTTPServer(ctx context.Context) error {
-	router := initRouter(a.provider.Handlers(ctx))
+	router := initRouter(a.provider.log, a.provider.Handlers(ctx))
 
 	a.httpServer = &http.Server{
 		Addr:           a.provider.Config().Address(),

@@ -1,16 +1,17 @@
 package app
 
 import (
+	"log/slog"
 	"github.com/Marif226/melon/internal/handler"
 	mw "github.com/Marif226/melon/internal/middleware"
 	mwLogger "github.com/Marif226/melon/internal/middleware/logger"
 	"github.com/go-chi/chi/v5"
 )
 
-func initRouter(handlers *handler.Provider) chi.Router {
+func initRouter(log *slog.Logger, handlers *handler.Provider) chi.Router {
 	router := chi.NewRouter()
 
-	router.Use(mwLogger.New(nil))
+	router.Use(mwLogger.New(log))
 	router.Use(mw.JsonapiMediaTypeMiddleware)
 
 	setRoutes(router, handlers)
