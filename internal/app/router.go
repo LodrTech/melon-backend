@@ -2,8 +2,21 @@ package app
 
 import (
 	"github.com/Marif226/melon/internal/handler"
+	mw "github.com/Marif226/melon/internal/middleware"
+	mwLogger "github.com/Marif226/melon/internal/middleware/logger"
 	"github.com/go-chi/chi/v5"
 )
+
+func initRouter(handlers *handler.Provider) chi.Router {
+	router := chi.NewRouter()
+
+	router.Use(mwLogger.New(nil))
+	router.Use(mw.JsonapiMediaTypeMiddleware)
+
+	setRoutes(router, handlers)
+
+	return router
+}
 
 func setRoutes(router chi.Router, handlers *handler.Provider) {
 	router.Route("/products", func(r chi.Router) {

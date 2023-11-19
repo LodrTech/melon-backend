@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	MigrationURL	string
+	Env				string
 	HTTPConfig
 	PGConfig
 }
@@ -27,6 +28,11 @@ func NewConfig() (*Config, error) {
 		return nil, errors.New("migration url not found")
 	}
 
+	env := os.Getenv("ENV")
+	if len(migrationURL) == 0 {
+		return nil, errors.New("env not found")
+	}
+
 	httpConfig, err := NewHTTPConfig()
 	if err != nil {
 		return nil, err
@@ -39,6 +45,7 @@ func NewConfig() (*Config, error) {
 
 	return &Config{
 		MigrationURL: migrationURL,
+		Env: env,
 		HTTPConfig: httpConfig,
 		PGConfig: pgConfig,
 	}, nil

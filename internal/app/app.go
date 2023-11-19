@@ -2,17 +2,22 @@ package app
 
 import (
 	"context"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 	"github.com/Marif226/melon/internal/config"
-	mw "github.com/Marif226/melon/internal/middleware"
-	"github.com/go-chi/chi/v5"
+)
+
+const (
+	envLocal = "local"
+	envDev   = "dev"
+	envProd  = "prod"
 )
 
 type App struct {
 	httpServer 		*http.Server
 	provider		*provider
+	log				*slog.Logger
 }
 
 func NewApp(ctx context.Context) (*App, error) {
@@ -62,11 +67,7 @@ func (a *App) initServiceProvider(_ context.Context) error {
 }
 
 func (a *App) initHTTPServer(ctx context.Context) error {
-	router := chi.NewRouter()
-
-	router.Use(mw.JsonapiMediaTypeMiddleware)
-
-	setRoutes(router, a.provider.Handlers(ctx))
+	router := initRouter(a.provider.Handlers(ctx))
 
 	a.httpServer = &http.Server{
 		Addr:           a.provider.Config().Address(),
@@ -76,13 +77,13 @@ func (a *App) initHTTPServer(ctx context.Context) error {
 		MaxHeaderBytes: 1 << 20, // memory limit for response header
 	}
 
-	a.runHTTPerver()
-
 	return nil
 }
 
 func (a *App) runHTTPerver() error {
-	log.Printf("HTTP server is running on %s", a.provider.Config().Address())
+	a.provider.log.Info("HTTP server is running", 
+		slog.String("address", a.provider.Config().Address()),
+	)
 
 	err := a.httpServer.ListenAndServe()
 	if err != nil {

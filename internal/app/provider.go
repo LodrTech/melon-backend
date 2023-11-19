@@ -3,9 +3,11 @@ package app
 import (
 	"context"
 	"errors"
-	"log"
+	"log/slog"
+	"os"
 	"github.com/Marif226/melon/internal/config"
 	"github.com/Marif226/melon/internal/handler"
+	"github.com/Marif226/melon/internal/lib/logger/sl"
 	"github.com/Marif226/melon/internal/repository"
 	"github.com/Marif226/melon/internal/service"
 	"github.com/Marif226/melon/pkg/client/postgres"
@@ -17,7 +19,7 @@ import (
 
 type provider struct {
 	config		*config.Config
-	
+	log 		*slog.Logger
 	postgres	*pgx.Conn
 	repos		*repository.Repository
 	services	*service.Provider
@@ -25,14 +27,35 @@ type provider struct {
 }
 
 func newProvider() *provider {
-	return &provider{}
+	p := &provider{}
+	p.setupLogger()
+
+	return p
+}
+
+func (p *provider) setupLogger() {
+	switch p.Config().Env {
+	case envLocal:
+		p.log = slog.New(
+			slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
+		)
+	case envDev:
+		p.log = slog.New(
+			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
+		)
+	case envProd:
+		p.log = slog.New(
+			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
+		)
+	}
 }
 
 func (p *provider) Config() *config.Config {
 	if p.config == nil {
 		config, err := config.NewConfig()
 		if err != nil {
-			log.Fatalf("failed to get config: %s", err.Error())
+			p.log.Error("failed to get config", sl.Err(err))
+			os.Exit(1)
 		}
 
 		p.config = config
@@ -44,22 +67,27 @@ func (p *provider) Config() *config.Config {
 func (p *provider) Postgres(ctx context.Context) *pgx.Conn {
 	if p.postgres == nil {
 		postgres, err := postgres.NewPostgresDB(ctx, p.Config().PGConfig)
+		p.log.Debug("init config",
+			slog.String("connection string",  p.Config().ConnectionString()),
+		)
 		if err != nil {
-			log.Fatalf("failed to get postgres: %s", err.Error())
+			p.log.Error("failed to get postgres", sl.Err(err))
+			os.Exit(1)
 		}
 
 		p.postgres = postgres
 	}
 
-	err := runDBMigrations(p.Config().MigrationURL, p.Config().ConnectionString())
+	err := p.runDBMigrations(p.Config().MigrationURL, p.Config().ConnectionString())
 	if err != nil {
-		log.Fatalf("failed to migrate: %s", err.Error())
+		p.log.Error("failed to migrate", sl.Err(err))
+		os.Exit(1)
 	}
 
 	return p.postgres
 }
 
-func runDBMigrations(migrationURL string, postgresURL string) error {
+func (p *provider) runDBMigrations(migrationURL string, postgresURL string) error {
 	m, err := migrate.New(migrationURL, postgresURL)
 	if err != nil {
 		return err
@@ -68,13 +96,13 @@ func runDBMigrations(migrationURL string, postgresURL string) error {
 	err = m.Up()
 	if err != nil {
 		if errors.Is(err, migrate.ErrNoChange) {
-			log.Println("migrate up:", err)
+			p.log.Debug("migrate up", sl.Err(err))
 			return nil
 		}
 		return err
 	}
 
-	log.Println("db migrated successfully")
+	p.log.Info("db migrated successfully")
 
 	return nil
 }
@@ -97,7 +125,7 @@ func (p *provider) Services(ctx context.Context) *service.Provider {
 
 func (p *provider) Handlers(ctx context.Context) *handler.Provider{
 	if p.handlers == nil {
-		p.handlers = handler.NewProvider(p.Services(ctx))
+		p.handlers = handler.NewProvider(p.log, p.Services(ctx))
 	}
 
 	return p.handlers
